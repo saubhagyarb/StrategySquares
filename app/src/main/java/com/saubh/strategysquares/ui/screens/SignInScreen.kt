@@ -38,8 +38,8 @@ fun SignInScreen(
     }
 
     // Lottie animation setup
-//    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.xo_animation))
-//    val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.xo_animation))
+    val progress by animateLottieCompositionAsState(composition)
 
     Column(
         modifier = modifier
@@ -76,14 +76,14 @@ fun SignInScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Lottie Animation
-//        LottieAnimation(
-//            composition = composition,
-//            progress = { progress },
-//            modifier = Modifier
-//                .height(220.dp)
-//                .fillMaxWidth()
-//        )
+//         Lottie Animation
+        LottieAnimation(
+            composition = composition,
+            progress = { progress },
+            modifier = Modifier
+                .height(220.dp)
+                .fillMaxWidth()
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
 

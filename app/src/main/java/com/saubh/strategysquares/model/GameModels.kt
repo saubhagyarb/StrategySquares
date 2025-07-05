@@ -23,7 +23,7 @@ data class Player(
     val email: String = "",
     val photoUrl: String = "",
     val score: Int = 0,
-    val symbol: String = "❌",
+    val symbol: String = "👽",
     val symbolColor: Long = 0xFF000000
 )
 
