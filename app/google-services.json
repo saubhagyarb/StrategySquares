@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "381492099418",
+    "firebase_url": "https://strategy-squares-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "strategy-squares",
+    "storage_bucket": "strategy-squares.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381492099418:android:68a3b0770ba0a97992db63",
+        "android_client_info": {
+          "package_name": "com.saubh.strategysquares"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "381492099418-o6dcsv0qqg5n9954km1fi6qvhs6lgl1o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.saubh.strategysquares",
+            "certificate_hash": "96bb3b4d5dbb28c5ba86a169e973108fcdd407b5"
+          }
+        },
+        {
+          "client_id": "381492099418-ao16tn2q80mgf84h7dcjhbligrhlasho.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7R_9B17aAVmqQGsdnaB6vFTvZhyN4NMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "381492099418-ao16tn2q80mgf84h7dcjhbligrhlasho.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
