@@ -60,7 +60,7 @@ class GameRepository @Inject constructor(
 
             // Update player2 with O symbol and different color
             val player2 = player.copy(
-                symbol = "O",
+                symbol = "⭕",
                 symbolColor = 0xFFF44336 // Red color for O
             )
 
@@ -153,7 +153,7 @@ class GameRepository @Inject constructor(
             }
 
             // Make the move
-            val symbol = if (playerId == gameState.player1.uid) "X" else "O"
+            val symbol = if (playerId == gameState.player1.uid) "❌" else "⭕"
             val newBoard = gameState.board.toMutableList().apply {
                 set(position, symbol)
             }
