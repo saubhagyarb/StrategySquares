@@ -2,15 +2,9 @@ package com.saubh.strategysquares.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
@@ -19,7 +13,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -33,10 +26,8 @@ import com.saubh.strategysquares.model.GameState
 import com.saubh.strategysquares.model.GameStatus
 import com.saubh.strategysquares.model.Player
 import com.saubh.strategysquares.ui.MainViewModel
-import com.saubh.strategysquares.ui.theme.*
 import kotlinx.coroutines.delay
 
-// Custom colors matching the design
 private val DarkText = Color(0xFF2C2C2C)
 private val LightGray = Color(0xFFF5F5F5)
 
@@ -70,7 +61,7 @@ fun GamePlayScreen(
         val currentBoard = gameRoom?.gameState?.board ?: emptyList()
         if (currentBoard != previousBoard && currentBoard.any { it.isNotEmpty() }) {
             showAnimation = true
-            delay(1500) // Animation duration
+            delay(1500)
             showAnimation = false
         }
         previousBoard = currentBoard
@@ -113,8 +104,7 @@ fun GamePlayScreen(
             // Top bar with back button and title
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -125,12 +115,11 @@ fun GamePlayScreen(
                     },
                     modifier = Modifier
                         .size(40.dp)
-                        .background(Color.White, CircleShape)
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = DarkText
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
 
@@ -138,116 +127,129 @@ fun GamePlayScreen(
                     text = "TIC TAC TOE",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        color = DarkText,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 20.sp
                     )
                 )
 
-                // Share button for game code
                 IconButton(
                     onClick = {
                         // TODO: Implement share functionality
                     },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color.White, CircleShape)
+                    modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
                         Icons.Default.Share,
                         contentDescription = "Share",
-                        tint = DarkText
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
 
             // Game Status Banner
-            Surface(
-                color = when {
-                    gameRoom?.gameState?.gameStatus == GameStatus.FINISHED && gameRoom.gameState.winner == currentPlayer?.uid -> MaterialTheme.colorScheme.tertiaryContainer
-                    gameRoom?.gameState?.gameStatus == GameStatus.FINISHED -> MaterialTheme.colorScheme.errorContainer
-                    gameRoom?.gameState?.gameStatus == GameStatus.DRAW -> MaterialTheme.colorScheme.secondaryContainer
-                    isCurrentPlayerTurn -> MaterialTheme.colorScheme.primaryContainer
-                    else -> MaterialTheme.colorScheme.secondary
+            Text(
+                text = when {
+                    gameRoom?.gameState?.gameStatus == GameStatus.WAITING ->
+                        "Play With Private Room"
+                    gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS && isCurrentPlayerTurn ->
+                        "Your Turn"
+                    gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS ->
+                        "${opponent?.name ?: "Opponent"}'s Turn"
+                    gameRoom?.gameState?.gameStatus == GameStatus.FINISHED &&
+                            gameRoom.gameState.winner == currentPlayer?.uid ->
+                        "You Won! 🎉"
+                    gameRoom?.gameState?.gameStatus == GameStatus.FINISHED ->
+                        "You Lost!"
+                    gameRoom?.gameState?.gameStatus == GameStatus.DRAW ->
+                        "It's a Draw!"
+                    else -> "Loading..."
                 },
-                shape = RoundedCornerShape(25.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = when {
-                        gameRoom?.gameState?.gameStatus == GameStatus.WAITING ->
-                            "Play With Private Room"
-                        gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS && isCurrentPlayerTurn ->
-                            "Your Turn"
-                        gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS ->
-                            "${opponent?.name}'s Turn"
-                        gameRoom?.gameState?.gameStatus == GameStatus.FINISHED &&
-                                gameRoom.gameState.winner == currentPlayer?.uid ->
-                            "You Won! 🎉"
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = when {
+                        gameRoom?.gameState?.gameStatus == GameStatus.FINISHED && gameRoom.gameState.winner == currentPlayer?.uid ->
+                            MaterialTheme.colorScheme.tertiary
                         gameRoom?.gameState?.gameStatus == GameStatus.FINISHED ->
-                            "You Lost!"
+                            MaterialTheme.colorScheme.error
                         gameRoom?.gameState?.gameStatus == GameStatus.DRAW ->
-                            "It's a Draw!"
-                        else -> "Loading..."
-                    },
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = when {
-                            gameRoom?.gameState?.gameStatus == GameStatus.FINISHED && gameRoom.gameState.winner == currentPlayer?.uid -> MaterialTheme.colorScheme.onTertiaryContainer
-                            gameRoom?.gameState?.gameStatus == GameStatus.FINISHED -> MaterialTheme.colorScheme.onErrorContainer
-                            gameRoom?.gameState?.gameStatus == GameStatus.DRAW -> MaterialTheme.colorScheme.onSecondaryContainer
-                            isCurrentPlayerTurn -> MaterialTheme.colorScheme.onPrimaryContainer
-                            else -> Color.White
-                        }
-                    ),
-                    modifier = Modifier.padding(16.dp),
-                    textAlign = TextAlign.Center
-                )
-            }
+                            MaterialTheme.colorScheme.secondary
+                        isCurrentPlayerTurn ->
+                            MaterialTheme.colorScheme.primary
+                        else ->
+                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    }
+                ),
+                modifier = Modifier.padding(vertical = 8.dp),
+                textAlign = TextAlign.Center
+            )
 
             // Players Section
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Current Player
-                PlayerCard(
-                    player = currentPlayer,
-                    isCurrentPlayer = true,
-                    isWaiting = gameRoom?.gameState?.gameStatus == GameStatus.WAITING,
-                    isActive = isCurrentPlayerTurn
-                )
-
-                // VS Circle
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-                    contentAlignment = Alignment.Center
+                // Player vs Player header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = "VS",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                    PlayerCard(
+                        player = currentPlayer,
+                        isCurrentPlayer = true,
+                        isWaiting = gameRoom?.gameState?.gameStatus == GameStatus.WAITING,
+                        isActive = isCurrentPlayerTurn
+                    )
+
+                    PlayerCard(
+                        player = opponent,
+                        isCurrentPlayer = false,
+                        isWaiting = gameRoom?.gameState?.gameStatus == GameStatus.WAITING,
+                        isActive = !isCurrentPlayerTurn && gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS
                     )
                 }
 
-                // Opponent
-                PlayerCard(
-                    player = opponent,
-                    isCurrentPlayer = false,
-                    isWaiting = gameRoom?.gameState?.gameStatus == GameStatus.WAITING,
-                    isActive = !isCurrentPlayerTurn && gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS
-                )
+                // Win Summit Section
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    WinSummitCard(
+                        title = "Win Summit",
+                        value = currentPlayer?.score ?: 0,
+                        isActive = isCurrentPlayerTurn
+                    )
+
+                    WinSummitCard(
+                        title = "Win Summit",
+                        value = opponent?.score ?: 0,
+                        isActive = !isCurrentPlayerTurn
+                    )
+                }
+
+                // Draw Counter
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Draws: ${/*gameRoom?.gameState?.drawCount ?:*/ 0} times",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                }
             }
 
             // Game Board
             Surface(
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -290,7 +292,7 @@ fun GamePlayScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Surface(
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.surface,
                             shape = RoundedCornerShape(15.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -301,7 +303,7 @@ fun GamePlayScreen(
                                 Text(
                                     text = "Game Room Code",
                                     style = MaterialTheme.typography.bodyMedium.copy(
-                                        color = DarkText.copy(alpha = 0.7f)
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                     )
                                 )
                                 Text(
@@ -326,7 +328,7 @@ fun GamePlayScreen(
                         ) {
                             Text(
                                 text = "Share Room Code",
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(8.dp)
                             )
@@ -342,14 +344,14 @@ fun GamePlayScreen(
                         Button(
                             onClick = { viewModel.requestRematch() },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                                containerColor = MaterialTheme.colorScheme.primary
                             ),
                             shape = RoundedCornerShape(25.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
                                 text = "Play Again",
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(8.dp)
                             )
@@ -382,12 +384,12 @@ fun GamePlayScreen(
             // Error messages
             AnimatedVisibility(visible = uiState.error != null) {
                 Surface(
-                    color = Color.Red.copy(alpha = 0.1f),
+                    color = MaterialTheme.colorScheme.errorContainer,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         text = uiState.error ?: "",
-                        color = Color.Red,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -414,76 +416,102 @@ fun GamePlayScreen(
 }
 
 @Composable
+private fun WinSummitCard(
+    title: String,
+    value: Int,
+    isActive: Boolean
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        )
+        Text(
+            text = value.toString(),
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = if (isActive) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface
+            )
+        )
+    }
+}
+
+@Composable
 private fun PlayerCard(
     player: Player?,
     isCurrentPlayer: Boolean,
     isWaiting: Boolean,
     isActive: Boolean
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.width(IntrinsicSize.Min) // Ensure the column takes minimum width
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .width(IntrinsicSize.Min)
     ) {
-        // Player Avatar
-        Box(
-            modifier = Modifier
-                .size(60.dp)
-                .background(
-                    if (isActive) MaterialTheme.colorScheme.primaryContainer else Color.White,
-                    CircleShape
-                )
-                .border(
-                    width = if (isActive) 3.dp else 1.dp,
-                    color = if (isActive) Color.White else Color.Gray.copy(alpha = 0.3f),
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                Icons.Default.Person,
-                contentDescription = "Player",
-                tint = if (isActive) Color.White else DarkText,
-                modifier = Modifier.size(30.dp)
-            )
-        }
-
-        // Player Symbol Badge
-        Surface(
-            color = if (isCurrentPlayer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-            shape = RoundedCornerShape(15.dp)
-        ) {
+        if (isCurrentPlayer) {
+            PlayerInfoContent(player, isActive, isWaiting)
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = if (isWaiting && !isCurrentPlayer) "?" else (player?.symbol ?: "?"),
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                text = "VS",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                ),
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
+            Spacer(modifier = Modifier.weight(1f))
+            PlayerInfoContent(player, isActive, isWaiting)
         }
+    }
+}
 
+@Composable
+private fun PlayerInfoContent(
+    player: Player?,
+    isActive: Boolean,
+    isWaiting: Boolean
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         // Player Name
         Text(
             text = when {
-                isCurrentPlayer -> "You"
-                isWaiting -> "Waiting..."
-                else -> player?.name ?: "Opponent"
+                player == null && isWaiting -> "Waiting..."
+                player == null -> "Opponent"
+                else -> player.name
             },
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.Medium,
-                color = DarkText
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             ),
             maxLines = 1,
-
+            modifier = Modifier.padding(bottom = 4.dp)
         )
 
-        // Player Score
-        if (!isWaiting && player != null) {
-            Text(
-                text = "${player.score} pts",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = DarkText.copy(alpha = 0.7f)
+        // Player Symbol
+        Surface(
+            color = if (isActive) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceVariant,
+            shape = CircleShape,
+            modifier = Modifier.size(36.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = player?.symbol ?: "?",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer
+                        else MaterialTheme.colorScheme.onSurface
+                    )
                 )
-            )
+            }
         }
     }
 }
@@ -496,8 +524,9 @@ private fun GameCell(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        color = if (symbol.isEmpty()) Color.White else Color.White.copy(alpha = 0.9f),
+        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(10.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = modifier
             .clickable(enabled = isClickable, onClick = onClick)
     ) {
@@ -510,7 +539,8 @@ private fun GameCell(
                     text = symbol,
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontWeight = FontWeight.Bold,
-                        color = if (symbol == "X") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
+                        color = if (symbol == "X") MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.secondary,
                         fontSize = 32.sp
                     )
                 )

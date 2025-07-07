@@ -63,6 +63,9 @@ fun NavGraph(
                 },
                 onViewLeaderboard = {
                     navController.navigate(Screen.Leaderboard.route)
+                },
+                onNavigateToSignIn = {
+                    navController.navigate(Screen.SignIn.route)
                 }
             )
         }
