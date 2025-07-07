@@ -2,15 +2,19 @@ package com.saubh.strategysquares.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,7 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.airbnb.lottie.compose.*
 import com.saubh.strategysquares.R
@@ -26,7 +33,12 @@ import com.saubh.strategysquares.model.GameState
 import com.saubh.strategysquares.model.GameStatus
 import com.saubh.strategysquares.model.Player
 import com.saubh.strategysquares.ui.MainViewModel
+import com.saubh.strategysquares.ui.theme.*
 import kotlinx.coroutines.delay
+
+// Custom colors matching the design
+private val DarkText = Color(0xFF2C2C2C)
+private val LightGray = Color(0xFFF5F5F5)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,228 +96,423 @@ fun GamePlayScreen(
         onLeaveGame()
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Game Room: $gameId") },
-                navigationIcon = {
-                    IconButton(onClick = {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        // Main game content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Top bar with back button and title
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
                         viewModel.leaveGame()
                         onLeaveGame()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Main game content
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Game Status
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(8.dp)
+                    },
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.White, CircleShape)
                 ) {
-                    Text(
-                        text = when {
-                            gameRoom?.gameState?.gameStatus == GameStatus.WAITING ->
-                                "Waiting for opponent..."
-                            gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS && isCurrentPlayerTurn ->
-                                "Your turn"
-                            gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS ->
-                                "${opponent?.name}'s turn"
-                            gameRoom?.gameState?.gameStatus == GameStatus.FINISHED &&
-                                    gameRoom.gameState.winner == currentPlayer?.uid ->
-                                "You won! 🎉"
-                            gameRoom?.gameState?.gameStatus == GameStatus.FINISHED ->
-                                "${opponent?.name} won!"
-                            gameRoom?.gameState?.gameStatus == GameStatus.DRAW ->
-                                "Game Draw!"
-                            else -> ""
-                        },
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier.padding(16.dp)
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = DarkText
                     )
                 }
 
-                // Players info
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                Text(
+                    text = "TIC TAC TOE",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = DarkText,
+                        fontSize = 20.sp
+                    )
+                )
+
+                // Share button for game code
+                IconButton(
+                    onClick = {
+                        // TODO: Implement share functionality
+                    },
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.White, CircleShape)
                 ) {
-                    // Current player
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "You (${currentPlayer?.symbol})",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = currentPlayer?.name ?: "",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            text = "Score: ${currentPlayer?.score ?: 0}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    // Opponent
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = if (gameRoom?.gameState?.gameStatus == GameStatus.WAITING)
-                                "Waiting for opponent..."
-                            else
-                                "Opponent (${opponent?.symbol ?: "O"})",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = opponent?.name ?: if (gameRoom?.gameState?.gameStatus == GameStatus.WAITING)
-                                "Share the game code!"
-                            else
-                                "Connecting...",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (opponent == null)
-                                MaterialTheme.colorScheme.secondary
-                            else
-                                MaterialTheme.colorScheme.onSurface
-                        )
-                    }
+                    Icon(
+                        Icons.Default.Share,
+                        contentDescription = "Share",
+                        tint = DarkText
+                    )
                 }
+            }
 
-                // Game board
+            // Game Status Banner
+            Surface(
+                color = when {
+                    gameRoom?.gameState?.gameStatus == GameStatus.FINISHED && gameRoom.gameState.winner == currentPlayer?.uid -> MaterialTheme.colorScheme.tertiaryContainer
+                    gameRoom?.gameState?.gameStatus == GameStatus.FINISHED -> MaterialTheme.colorScheme.errorContainer
+                    gameRoom?.gameState?.gameStatus == GameStatus.DRAW -> MaterialTheme.colorScheme.secondaryContainer
+                    isCurrentPlayerTurn -> MaterialTheme.colorScheme.primaryContainer
+                    else -> MaterialTheme.colorScheme.secondary
+                },
+                shape = RoundedCornerShape(25.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = when {
+                        gameRoom?.gameState?.gameStatus == GameStatus.WAITING ->
+                            "Play With Private Room"
+                        gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS && isCurrentPlayerTurn ->
+                            "Your Turn"
+                        gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS ->
+                            "${opponent?.name}'s Turn"
+                        gameRoom?.gameState?.gameStatus == GameStatus.FINISHED &&
+                                gameRoom.gameState.winner == currentPlayer?.uid ->
+                            "You Won! 🎉"
+                        gameRoom?.gameState?.gameStatus == GameStatus.FINISHED ->
+                            "You Lost!"
+                        gameRoom?.gameState?.gameStatus == GameStatus.DRAW ->
+                            "It's a Draw!"
+                        else -> "Loading..."
+                    },
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = when {
+                            gameRoom?.gameState?.gameStatus == GameStatus.FINISHED && gameRoom.gameState.winner == currentPlayer?.uid -> MaterialTheme.colorScheme.onTertiaryContainer
+                            gameRoom?.gameState?.gameStatus == GameStatus.FINISHED -> MaterialTheme.colorScheme.onErrorContainer
+                            gameRoom?.gameState?.gameStatus == GameStatus.DRAW -> MaterialTheme.colorScheme.onSecondaryContainer
+                            isCurrentPlayerTurn -> MaterialTheme.colorScheme.onPrimaryContainer
+                            else -> Color.White
+                        }
+                    ),
+                    modifier = Modifier.padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Players Section
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Current Player
+                PlayerCard(
+                    player = currentPlayer,
+                    isCurrentPlayer = true,
+                    isWaiting = gameRoom?.gameState?.gameStatus == GameStatus.WAITING,
+                    isActive = isCurrentPlayerTurn
+                )
+
+                // VS Circle
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .aspectRatio(1f)
-                        .border(2.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                        .size(60.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        for (row in 0..2) {
-                            Row(
-                                modifier = Modifier.weight(1f),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                for (col in 0..2) {
-                                    val index = row * 3 + col
-                                    val symbol = gameRoom?.gameState?.board?.getOrNull(index) ?: ""
-                                    val isClickable = isCurrentPlayerTurn &&
-                                            gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS &&
-                                            symbol.isEmpty()
+                    Text(
+                        text = "VS",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    )
+                }
 
-                                    Box(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .aspectRatio(1f)
-                                            .padding(4.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .border(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.outline,
-                                                RoundedCornerShape(4.dp)
-                                            )
-                                            .background(
-                                                if (isClickable)
-                                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
-                                                else
-                                                    MaterialTheme.colorScheme.surface
-                                            )
-                                            .clickable(
-                                                enabled = isClickable,
-                                                onClick = {
-                                                    viewModel.makeMove(index)
-                                                }
-                                            ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        if (symbol.isNotEmpty()) {
-                                            Text(
-                                                text = symbol,
-                                                style = MaterialTheme.typography.displayMedium.copy(
-                                                    color = if (symbol == "X")
-                                                        MaterialTheme.colorScheme.primary
-                                                    else
-                                                        MaterialTheme.colorScheme.secondary
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
+                // Opponent
+                PlayerCard(
+                    player = opponent,
+                    isCurrentPlayer = false,
+                    isWaiting = gameRoom?.gameState?.gameStatus == GameStatus.WAITING,
+                    isActive = !isCurrentPlayerTurn && gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS
+                )
+            }
+
+            // Game Board
+            Surface(
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    for (row in 0..2) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            for (col in 0..2) {
+                                val index = row * 3 + col
+                                val symbol = gameRoom?.gameState?.board?.getOrNull(index) ?: ""
+                                val isClickable = isCurrentPlayerTurn &&
+                                        gameRoom?.gameState?.gameStatus == GameStatus.IN_PROGRESS &&
+                                        symbol.isEmpty()
+
+                                GameCell(
+                                    symbol = symbol,
+                                    isClickable = isClickable,
+                                    onClick = { viewModel.makeMove(index) },
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                        .padding(4.dp)
+                                )
                             }
                         }
                     }
                 }
+            }
 
-                // Game controls
-                AnimatedVisibility(
-                    visible = gameRoom?.gameState?.gameStatus == GameStatus.FINISHED ||
-                            gameRoom?.gameState?.gameStatus == GameStatus.DRAW
-                ) {
-                    Button(
-                        onClick = { viewModel.requestRematch() },
-                        modifier = Modifier.fillMaxWidth(0.6f)
+            // Action Buttons
+            when (gameRoom?.gameState?.gameStatus) {
+                GameStatus.WAITING -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text("Play Again")
-                    }
-                }
-
-                // Game code for waiting state
-                AnimatedVisibility(
-                    visible = gameRoom?.gameState?.gameStatus == GameStatus.WAITING
-                ) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        Surface(
+                            color = Color.White,
+                            shape = RoundedCornerShape(15.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Share this code with your opponent:")
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Game Room Code",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        color = DarkText.copy(alpha = 0.7f)
+                                    )
+                                )
+                                Text(
+                                    text = gameId,
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                            }
+                        }
+
+                        Button(
+                            onClick = {
+                                // TODO: Implement share room code
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            ),
+                            shape = RoundedCornerShape(25.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             Text(
-                                text = gameId,
-                                style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier.padding(top = 8.dp)
+                                text = "Share Room Code",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(8.dp)
                             )
                         }
                     }
                 }
 
-                // Error messages
-                AnimatedVisibility(visible = uiState.error != null) {
+                GameStatus.FINISHED, GameStatus.DRAW -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Button(
+                            onClick = { viewModel.requestRematch() },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            shape = RoundedCornerShape(25.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Play Again",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                viewModel.leaveGame()
+                                onLeaveGame()
+                            },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            ),
+                            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+                            shape = RoundedCornerShape(25.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Home",
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                    }
+                }
+
+                else -> {}
+            }
+
+            // Error messages
+            AnimatedVisibility(visible = uiState.error != null) {
+                Surface(
+                    color = Color.Red.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
                     Text(
                         text = uiState.error ?: "",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp)
                     )
                 }
             }
+        }
 
-            // Lottie animation overlay
-            AnimatedVisibility(
-                visible = showAnimation,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                LottieAnimation(
-                    composition = composition,
-                    progress = { progress },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f)),
-                    contentScale = ContentScale.Crop
+        // Lottie animation overlay
+        AnimatedVisibility(
+            visible = showAnimation,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            LottieAnimation(
+                composition = composition,
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+@Composable
+private fun PlayerCard(
+    player: Player?,
+    isCurrentPlayer: Boolean,
+    isWaiting: Boolean,
+    isActive: Boolean
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.width(IntrinsicSize.Min) // Ensure the column takes minimum width
+    ) {
+        // Player Avatar
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .background(
+                    if (isActive) MaterialTheme.colorScheme.primaryContainer else Color.White,
+                    CircleShape
+                )
+                .border(
+                    width = if (isActive) 3.dp else 1.dp,
+                    color = if (isActive) Color.White else Color.Gray.copy(alpha = 0.3f),
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Default.Person,
+                contentDescription = "Player",
+                tint = if (isActive) Color.White else DarkText,
+                modifier = Modifier.size(30.dp)
+            )
+        }
+
+        // Player Symbol Badge
+        Surface(
+            color = if (isCurrentPlayer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            shape = RoundedCornerShape(15.dp)
+        ) {
+            Text(
+                text = if (isWaiting && !isCurrentPlayer) "?" else (player?.symbol ?: "?"),
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+            )
+        }
+
+        // Player Name
+        Text(
+            text = when {
+                isCurrentPlayer -> "You"
+                isWaiting -> "Waiting..."
+                else -> player?.name ?: "Opponent"
+            },
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.Medium,
+                color = DarkText
+            ),
+            maxLines = 1,
+
+        )
+
+        // Player Score
+        if (!isWaiting && player != null) {
+            Text(
+                text = "${player.score} pts",
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = DarkText.copy(alpha = 0.7f)
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun GameCell(
+    symbol: String,
+    isClickable: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        color = if (symbol.isEmpty()) Color.White else Color.White.copy(alpha = 0.9f),
+        shape = RoundedCornerShape(10.dp),
+        modifier = modifier
+            .clickable(enabled = isClickable, onClick = onClick)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (symbol.isNotEmpty()) {
+                Text(
+                    text = symbol,
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = if (symbol == "X") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
+                        fontSize = 32.sp
+                    )
                 )
             }
         }
