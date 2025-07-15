@@ -1,5 +1,7 @@
 package com.saubh.strategysquares.ui.screens
 
+import android.content.Context
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
@@ -11,10 +13,12 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,8 +32,6 @@ import com.saubh.strategysquares.model.Player
 import com.saubh.strategysquares.ui.MainViewModel
 import kotlinx.coroutines.delay
 
-private val DarkText = Color(0xFF2C2C2C)
-private val LightGray = Color(0xFFF5F5F5)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +57,11 @@ fun GamePlayScreen(
         speed = 1f,
         restartOnPlay = true
     )
+
+    //Scores
+    val firstPlayerScore by rememberSaveable { mutableIntStateOf(0) }
+
+    val context = LocalContext.current
 
     // Detect board changes and trigger animation
     LaunchedEffect(gameRoom?.gameState?.board) {
@@ -133,9 +140,7 @@ fun GamePlayScreen(
                 )
 
                 IconButton(
-                    onClick = {
-                        // TODO: Implement share functionality
-                    },
+                    onClick = { onShare(gameId = gameId, context = context) },
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
@@ -317,9 +322,7 @@ fun GamePlayScreen(
                         }
 
                         Button(
-                            onClick = {
-                                // TODO: Implement share room code
-                            },
+                            onClick = { onShare(gameId = gameId, context = context) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
                             ),
@@ -547,4 +550,18 @@ private fun GameCell(
             }
         }
     }
+}
+
+fun onShare(gameId : String, context : Context){
+    val shareText = "Join my Tic Tac Toe game! Game Code: $gameId"
+
+    val sendIntent: Intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, shareText)
+        type = "text/plain" // Specify the MIME type as plain text
+    }
+
+    // Create a chooser dialog to let the user pick an app to share with
+    val shareIntent = Intent.createChooser(sendIntent, "Share Game Code Via")
+    context.startActivity(shareIntent)
 }

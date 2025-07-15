@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.saubh.strategysquares.model.ChatMessage
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

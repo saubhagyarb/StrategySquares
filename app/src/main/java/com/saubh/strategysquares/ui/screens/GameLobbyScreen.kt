@@ -16,11 +16,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.saubh.strategysquares.ui.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,6 +34,7 @@ fun GameLobbyScreen(
     onJoinGame: (String) -> Unit,
     onViewLeaderboard: () -> Unit,
     onNavigateToSignIn: () -> Unit,
+    sharedGameCode: String? = null,
     viewModel: MainViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -122,22 +127,25 @@ fun GameLobbyScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // User Avatar
-                Box(
+                AsyncImage(
+                    model = uiState.currentPlayer?.photoUrl,
+                    contentDescription = "User Avatar",
                     modifier = Modifier
                         .size(80.dp)
-                        .background(
-                            MaterialTheme.colorScheme.primary,
-                            CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = "User Avatar",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentScale = ContentScale.Crop,
+//                    fallback = {
+//                        Icon(
+//                            Icons.Default.Person,
+//                            contentDescription = "User Avatar Placeholder",
+//                            tint = MaterialTheme.colorScheme.onPrimary,
+//                            modifier = Modifier
+//                                .fillMaxSize()
+//                                .padding(20.dp) // Add padding to the icon itself
+//                        )
+//                    }
+                )
 
                 // User Name
                 Text(

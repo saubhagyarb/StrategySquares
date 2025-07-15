@@ -1,6 +1,7 @@
 package com.saubh.strategysquares
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -36,7 +37,7 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         when (result.resultCode) {
-            Activity.RESULT_OK -> {
+            RESULT_OK -> {
                 if (result.data == null) {
                     Log.e("MainActivity", "Sign-in intent returned null data!")
                     viewModel.handleSignInError("Sign-in failed: No data returned.")
@@ -65,11 +66,11 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-            Activity.RESULT_CANCELED -> {
+            RESULT_CANCELED -> {
                 Log.d("MainActivity", "Sign in was cancelled by user")
                 viewModel.handleSignInError("Sign in cancelled by user")
             }
-            else -> {
+            else -> {0
                 Log.e("MainActivity", "Sign in failed with unexpected result code: ${result.resultCode}")
                 viewModel.handleSignInError("Sign in failed unexpectedly. Please try again.")
             }
@@ -123,5 +124,4 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         viewModel.leaveGame()
     }
-
 }
