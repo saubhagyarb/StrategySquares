@@ -2,6 +2,8 @@ package com.saubh.strategysquares.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -17,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +43,7 @@ fun GameLobbyScreen(
 ) {
     var joinGameCode by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
+    var showEmojiDialog by remember { mutableStateOf(false) }
 
     // Handle navigation when game room is created or joined
     LaunchedEffect(uiState.currentGameRoom) {
@@ -71,9 +75,7 @@ fun GameLobbyScreen(
             ) {
                 // Settings button
                 IconButton(
-                    onClick = {
-                        // TODO: Implement settings
-                    },
+                    onClick = { showEmojiDialog = true },
                     modifier = Modifier
                         .size(40.dp)
                         .background(
@@ -341,9 +343,7 @@ fun GameLobbyScreen(
 
                 // Settings Button
                 Surface(
-                    onClick = {
-                        // TODO: Implement detailed settings
-                    },
+                    onClick = { showEmojiDialog = true },
                     color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.size(60.dp)
@@ -378,4 +378,59 @@ fun GameLobbyScreen(
             }
         }
     }
+    if (showEmojiDialog) {
+        EmojiInputDialog(
+            currentEmoji = uiState.currentPlayer?.symbol ?: "",
+            onDismiss = { showEmojiDialog = false },
+            onEmojiConfirmed = { newEmoji ->
+                viewModel.updateUserEmoji(newEmoji)
+            }
+        )
+    }
 }
+
+@Composable
+fun EmojiInputDialog(
+    currentEmoji: String,
+    onDismiss: () -> Unit,
+    onEmojiConfirmed: (String) -> Unit
+) {
+    var inputEmoji by remember { mutableStateOf(currentEmoji) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (inputEmoji.isNotBlank()) {
+                        onEmojiConfirmed(inputEmoji)
+                        onDismiss()
+                    }
+                }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        title = { Text("Set Your Emoji") },
+        text = {
+            Column {
+                Text("Enter any one emoji to represent you:")
+                OutlinedTextField(
+                    value = inputEmoji,
+                    onValueChange = { new ->
+                        // Optional: Validate for single character only
+                        inputEmoji = new.take(2) // Emojis are 2-character UTF sometimes
+                    },
+                    singleLine = true,
+                    placeholder = { Text("e.g. 👽") }
+                )
+            }
+        }
+    )
+}
+

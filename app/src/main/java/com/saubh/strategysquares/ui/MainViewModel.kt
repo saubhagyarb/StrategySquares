@@ -237,4 +237,14 @@ class MainViewModel @Inject constructor(
     fun clearCurrentGame() {
         _uiState.update { it.copy(currentGameRoom = null) }
     }
+
+    fun updateUserEmoji(newEmoji: String) {
+        viewModelScope.launch {
+            val currentPlayer = _uiState.value.currentPlayer ?: return@launch
+            val updatedPlayer = currentPlayer.copy(symbol = newEmoji)
+            gameRepository.createOrUpdatePlayer(updatedPlayer)
+            _uiState.update { it.copy(currentPlayer = updatedPlayer) }
+        }
+    }
+
 }

@@ -1,7 +1,6 @@
 package com.saubh.strategysquares.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SportsEsports
@@ -102,7 +101,7 @@ fun SignInScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    painter = painterResource(com.google.android.gms.base.R.drawable.googleg_disabled_color_18), // Replace with your asset
+                    painter = painterResource(id = R.drawable.ic_google_logo),
                     contentDescription = "Google Logo",
                     modifier = Modifier.size(24.dp)
                 )

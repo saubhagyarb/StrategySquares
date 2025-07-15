@@ -49,7 +49,7 @@ fun GamePlayScreen(
     var showAnimation by remember { mutableStateOf(false) }
 
     // Lottie animation setup
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fire_anim))
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.win_animation))
     val progress by animateLottieCompositionAsState(
         composition,
         iterations = 1,
@@ -64,14 +64,15 @@ fun GamePlayScreen(
     val context = LocalContext.current
 
     // Detect board changes and trigger animation
-    LaunchedEffect(gameRoom?.gameState?.board) {
-        val currentBoard = gameRoom?.gameState?.board ?: emptyList()
-        if (currentBoard != previousBoard && currentBoard.any { it.isNotEmpty() }) {
+    LaunchedEffect(gameRoom?.gameState?.gameStatus) {
+        val gameState = gameRoom?.gameState
+        val isWinner = gameState?.winner == currentPlayer?.uid
+
+        if (gameState?.gameStatus == GameStatus.FINISHED && isWinner) {
             showAnimation = true
             delay(1500)
             showAnimation = false
         }
-        previousBoard = currentBoard
     }
 
     // Opponent logic
